@@ -8,6 +8,14 @@ import { CourseList } from '@/components/course-list';
 import { Timetable } from '@/components/timetable';
 import { Button } from '@/components/ui/button';
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -20,7 +28,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { BookOpen, CalendarDays, Mail, AlertTriangle, Info, Clock } from 'lucide-react';
+import { BookOpen, CalendarDays, Mail, AlertTriangle, Info, Clock, Menu } from 'lucide-react';
 import { useSessionTimeout } from '@/hooks/use-session-timeout';
 import { SessionTimeoutModal } from '@/components/session-timeout-modal';
 
@@ -36,6 +44,14 @@ const HomePage: FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const { toast } = useToast();
   const [email, setEmail] = useState('');
+  const [currentTime, setCurrentTime] = useState('');
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentTime(new Date().toLocaleTimeString());
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const { isModalOpen, handleStay, handleLogout, active, remaining } = useSessionTimeout(15 * 60 * 1000);
 
@@ -145,18 +161,40 @@ const HomePage: FC = () => {
   
   return (
     <div className="min-h-screen w-full">
-      <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6">
-        <div className="flex items-center gap-2">
-          <CalendarDays className="h-6 w-6 text-primary" />
-          <h1 className="text-2xl font-bold tracking-tight font-headline">CourseCraft</h1>
+      <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6 justify-between">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <CalendarDays className="h-6 w-6 text-primary" />
+            <h1 className="text-2xl font-bold tracking-tight font-headline">CourseCraft</h1>
+          </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon">
+                <Menu className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuLabel>Menu</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onSelect={() => alert('View course clicked')}>View Course</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => alert('Modify clicked')}>Modify</DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => alert('View faculty list clicked')}>View Faculty List</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-        <div className="flex-1 flex items-center justify-center gap-4 text-sm font-medium">
+
+        <div className="flex items-center gap-4 text-sm font-medium">
           <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-card border">
             <Clock className="h-4 w-4 text-muted-foreground" />
             <span className="font-semibold">{totalCredits}</span>
             <span className="text-muted-foreground">Credits</span>
           </div>
+          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-card border">
+            <Clock className="h-4 w-4 text-muted-foreground" />
+            <span className="font-semibold">{currentTime}</span>
+          </div>
         </div>
+
         <Dialog>
           <DialogTrigger asChild>
             <Button disabled={creditStatus !== 'ok'}>
