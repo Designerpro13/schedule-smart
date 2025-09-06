@@ -1,5 +1,8 @@
+
 'use client';
 
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
@@ -7,40 +10,41 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Progress } from '@/components/ui/progress';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { BookOpen, Calendar, Users, Award, BookCopy, BarChart, Settings, FolderClock, LogOut } from 'lucide-react';
-
-const student = {
-  name: 'Alex Doe',
-  id: '123456',
-  email: 'alex.doe@university.edu',
-  avatar: 'https://i.pravatar.cc/150?u=alexdoe',
-  major: 'Computer Science',
-  year: '3rd Year',
-  semester: 'Fall 2024',
-  creditsCompleted: 78,
-  creditsRequired: 120,
-};
-
-const quickLinks = [
-  { href: '/scheduler', label: 'Plan my Schedule', icon: Calendar },
-  { href: '/courses', label: 'Browse Courses', icon: BookOpen },
-  { href: '/faculty', label: 'View Faculty', icon: Users },
-  { href: '/my-timetables', label: 'My Timetables', icon: FolderClock },
-];
-
-const completedCourses = [
-    { code: 'CS 101', title: 'Intro to Programming', credits: 4, grade: 'A' },
-    { code: 'MATH 150', title: 'Calculus I', credits: 5, grade: 'B+' },
-    { code: 'PHY 100', title: 'Classical Mechanics', credits: 4, grade: 'A-' },
-    { code: 'HUM 120', title: 'World History', credits: 3, grade: 'B' },
-];
+import { useAuth } from '@/context/auth-context';
+import { mockPastTimetables } from '@/lib/data'; // Using this to get some completed courses
 
 export default function DashboardPage() {
-    const creditProgress = (student.creditsCompleted / student.creditsRequired) * 100;
+    const { user, logout } = useAuth();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (!user) {
+            router.push('/login');
+        }
+    }, [user, router]);
+
+    if (!user) {
+        return <div className="flex items-center justify-center min-h-screen">Loading...</div>; // Or a proper loader
+    }
+
+    const { name, avatar, semester, major, year, creditsCompleted, creditsRequired } = user.profile;
+
+    const creditProgress = (creditsCompleted / creditsRequired) * 100;
+    
+    // For demonstration, taking some courses from past timetables.
+    const completedCourses = mockPastTimetables[0]?.courses.slice(0, 4) || [];
 
     const handleLogout = () => {
-      // In a real app, this would handle the logout logic
-      alert('You have been logged out.');
+      logout();
+      router.push('/login');
     };
+
+    const quickLinks = [
+      { href: '/scheduler', label: 'Plan my Schedule', icon: Calendar },
+      { href: '/courses', label: 'Browse Courses', icon: BookOpen },
+      { href: '/faculty', label: 'View Faculty', icon: Users },
+      { href: '/my-timetables', label: 'My Timetables', icon: FolderClock },
+    ];
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -55,10 +59,10 @@ export default function DashboardPage() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center gap-2 p-1 rounded-full focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
-                  <span className="text-sm font-medium text-muted-foreground hidden sm:inline-block">{student.name}</span>
+                  <span className="text-sm font-medium text-muted-foreground hidden sm:inline-block">{name}</span>
                   <Avatar className="w-9 h-9">
-                    <AvatarImage src={student.avatar} alt={student.name} />
-                    <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
+                    <AvatarImage src={avatar} alt={name} />
+                    <AvatarFallback>{name.charAt(0)}</AvatarFallback>
                   </Avatar>
                 </button>
               </DropdownMenuTrigger>
@@ -83,8 +87,8 @@ export default function DashboardPage() {
         <div className="lg:col-span-3 md:col-span-2 space-y-6">
             <Card>
                 <CardHeader>
-                    <CardTitle className="font-headline text-2xl">Welcome back, {student.name.split(' ')[0]}!</CardTitle>
-                    <CardDescription>Here's your academic overview for {student.semester}.</CardDescription>
+                    <CardTitle className="font-headline text-2xl">Welcome back, {name.split(' ')[0]}!</CardTitle>
+                    <CardDescription>Here's your academic overview for {semester}.</CardDescription>
                 </CardHeader>
                 <CardContent className="grid gap-6 sm:grid-cols-2">
                     <Card>
@@ -93,7 +97,7 @@ export default function DashboardPage() {
                             <Award className="w-4 h-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{student.creditsCompleted} / {student.creditsRequired}</div>
+                            <div className="text-2xl font-bold">{creditsCompleted} / {creditsRequired}</div>
                             <p className="text-xs text-muted-foreground">credits completed</p>
                             <Progress value={creditProgress} className="mt-2 h-2" />
                         </CardContent>
@@ -104,8 +108,8 @@ export default function DashboardPage() {
                              <Calendar className="w-4 h-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{student.semester}</div>
-                            <p className="text-xs text-muted-foreground">{student.major} &bull; {student.year}</p>
+                            <div className="text-2xl font-bold">{semester}</div>
+                            <p className="text-xs text-muted-foreground">{major} &bull; {year}</p>
                         </CardContent>
                     </Card>
                 </CardContent>
