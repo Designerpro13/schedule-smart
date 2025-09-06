@@ -25,3 +25,15 @@ export type Faculty = {
   department: Department;
   subjects: string[];
 };
+
+export type PastCourse = {
+  code: string;
+  title: string;
+  credits: number;
+  grade: string;
+};
+
+export type PastTimetable = {
+  semester: string;
+  courses: PastCourse[];
+};

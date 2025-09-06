@@ -185,8 +185,8 @@ const SchedulerPage: FC = () => {
               <Link href="/courses" passHref>
                 <DropdownMenuItem>View Courses</DropdownMenuItem>
               </Link>
-              <Link href="/modify" passHref>
-                <DropdownMenuItem>Modify</DropdownMenuItem>
+              <Link href="/my-timetables" passHref>
+                <DropdownMenuItem>My Timetables</DropdownMenuItem>
               </Link>
               <Link href="/faculty" passHref>
                 <DropdownMenuItem>View Faculty List</DropdownMenuItem>

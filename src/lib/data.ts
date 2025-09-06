@@ -1,4 +1,4 @@
-import type { Course, Faculty } from './types';
+import type { Course, Faculty, PastTimetable } from './types';
 
 export const mockCourses: Course[] = [
   {
@@ -141,5 +141,26 @@ export const mockFaculty: Faculty[] = [
     email: 'will.d@university.edu',
     department: 'Humanities',
     subjects: ['HUM 120', 'HUM 300'],
+  },
+];
+
+export const mockPastTimetables: PastTimetable[] = [
+  {
+    semester: 'Spring 2024',
+    courses: [
+      { code: 'CS 303', title: 'Operating Systems', credits: 3, grade: 'A' },
+      { code: 'MATH 250', title: 'Linear Algebra', credits: 4, grade: 'A-' },
+      { code: 'PHY 210', title: 'Electromagnetism', credits: 4, grade: 'B+' },
+      { code: 'HUM 300', title: 'Ethics in the Modern World', credits: 3, grade: 'A' },
+    ],
+  },
+  {
+    semester: 'Fall 2023',
+    courses: [
+      { code: 'CS 202', title: 'Data Structures & Algorithms', credits: 4, grade: 'B+' },
+      { code: 'MATH 150', title: 'Calculus I', credits: 5, grade: 'A' },
+      { code: 'PHY 100', title: 'Classical Mechanics', credits: 4, grade: 'B' },
+      { code: 'HUM 120', title: 'World History: Ancient Civilizations', credits: 3, grade: 'A-' },
+    ],
   },
 ];

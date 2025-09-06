@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { BookOpen, Calendar, Edit, Users, Award, BookCopy, BarChart, Settings } from 'lucide-react';
+import { BookOpen, Calendar, Users, Award, BookCopy, BarChart, Settings, FolderClock } from 'lucide-react';
 
 const student = {
   name: 'Alex Doe',
@@ -23,7 +23,7 @@ const quickLinks = [
   { href: '/scheduler', label: 'Plan my Schedule', icon: Calendar },
   { href: '/courses', label: 'Browse Courses', icon: BookOpen },
   { href: '/faculty', label: 'View Faculty', icon: Users },
-  { href: '/modify', label: 'Modify Courses', icon: Edit },
+  { href: '/my-timetables', label: 'My Timetables', icon: FolderClock },
 ];
 
 const completedCourses = [
