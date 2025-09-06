@@ -5,7 +5,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { BookOpen, Calendar, Users, Award, BookCopy, BarChart, Settings, FolderClock } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { BookOpen, Calendar, Users, Award, BookCopy, BarChart, Settings, FolderClock, LogOut } from 'lucide-react';
 
 const student = {
   name: 'Alex Doe',
@@ -36,6 +37,11 @@ const completedCourses = [
 export default function DashboardPage() {
     const creditProgress = (student.creditsCompleted / student.creditsRequired) * 100;
 
+    const handleLogout = () => {
+      // In a real app, this would handle the logout logic
+      alert('You have been logged out.');
+    };
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-10 flex items-center h-16 px-4 border-b bg-background/80 backdrop-blur-sm md:px-6 justify-between">
@@ -46,11 +52,30 @@ export default function DashboardPage() {
           </Link>
         </div>
         <div className="flex items-center gap-4">
-            <span className="text-sm font-medium text-muted-foreground hidden sm:inline-block">{student.name}</span>
-            <Avatar className="w-9 h-9">
-              <AvatarImage src={student.avatar} alt={student.name} />
-              <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
-            </Avatar>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-2 p-1 rounded-full focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2">
+                  <span className="text-sm font-medium text-muted-foreground hidden sm:inline-block">{student.name}</span>
+                  <Avatar className="w-9 h-9">
+                    <AvatarImage src={student.avatar} alt={student.name} />
+                    <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
+                  </Avatar>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <Settings className="w-4 h-4 mr-2" />
+                  Profile
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout}>
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Logout
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
         </div>
       </header>
 
