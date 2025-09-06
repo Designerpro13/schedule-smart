@@ -17,3 +17,11 @@ export type TimetableCourse = Course & {
 };
 
 export type Day = 'Monday' | 'Tuesday' | 'Wednesday' | 'Thursday' | 'Friday';
+
+export type Faculty = {
+  id: string;
+  name: string;
+  email: string;
+  department: Department;
+  subjects: string[];
+};

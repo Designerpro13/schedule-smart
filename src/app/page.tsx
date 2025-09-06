@@ -1,6 +1,7 @@
 'use client';
 
 import type { FC } from 'react';
+import Link from 'next/link';
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import type { Course, TimetableCourse, Day, Department } from '@/lib/types';
 import { mockCourses } from '@/lib/data';
@@ -163,10 +164,10 @@ const HomePage: FC = () => {
     <div className="min-h-screen w-full">
       <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6 justify-between">
         <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2">
             <CalendarDays className="h-6 w-6 text-primary" />
             <h1 className="text-2xl font-bold tracking-tight font-headline">CourseCraft</h1>
-          </div>
+          </Link>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="icon">
@@ -176,9 +177,15 @@ const HomePage: FC = () => {
             <DropdownMenuContent>
               <DropdownMenuLabel>Menu</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onSelect={() => alert('View course clicked')}>View Course</DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => alert('Modify clicked')}>Modify</DropdownMenuItem>
-              <DropdownMenuItem onSelect={() => alert('View faculty list clicked')}>View Faculty List</DropdownMenuItem>
+              <Link href="/courses" passHref>
+                <DropdownMenuItem>View Courses</DropdownMenuItem>
+              </Link>
+              <Link href="/modify" passHref>
+                <DropdownMenuItem>Modify</DropdownMenuItem>
+              </Link>
+              <Link href="/faculty" passHref>
+                <DropdownMenuItem>View Faculty List</DropdownMenuItem>
+              </Link>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

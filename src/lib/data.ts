@@ -1,4 +1,4 @@
-import type { Course } from './types';
+import type { Course, Faculty } from './types';
 
 export const mockCourses: Course[] = [
   {
@@ -96,5 +96,50 @@ export const mockCourses: Course[] = [
     credits: 4,
     department: 'Physics',
     description: 'Introduction to the principles of quantum mechanics, including wave-particle duality and the Schrödinger equation.',
+  },
+];
+
+export const mockFaculty: Faculty[] = [
+  {
+    id: 'fac001',
+    name: 'Dr. Alan Turing',
+    email: 'alan.t@university.edu',
+    department: 'Computer Science',
+    subjects: ['CS 101', 'CS 202'],
+  },
+  {
+    id: 'fac002',
+    name: 'Dr. Grace Hopper',
+    email: 'grace.h@university.edu',
+    department: 'Computer Science',
+    subjects: ['CS 303', 'CS 404'],
+  },
+  {
+    id: 'fac003',
+    name: 'Dr. Isaac Newton',
+    email: 'isaac.n@university.edu',
+    department: 'Mathematics',
+    subjects: ['MATH 150', 'PHY 100'],
+  },
+  {
+    id: 'fac004',
+    name: 'Dr. Emmy Noether',
+    email: 'emmy.n@university.edu',
+    department: 'Mathematics',
+    subjects: ['MATH 250', 'MATH 320'],
+  },
+  {
+    id: 'fac005',
+    name: 'Dr. Marie Curie',
+    email: 'marie.c@university.edu',
+    department: 'Physics',
+    subjects: ['PHY 210', 'PHY 350'],
+  },
+  {
+    id: 'fac006',
+    name: 'Dr. Will Durant',
+    email: 'will.d@university.edu',
+    department: 'Humanities',
+    subjects: ['HUM 120', 'HUM 300'],
   },
 ];
