@@ -1,285 +1,150 @@
 'use client';
 
-import type { FC } from 'react';
 import Link from 'next/link';
-import { useState, useMemo, useEffect, useCallback } from 'react';
-import type { Course, TimetableCourse, Day, Department } from '@/lib/types';
-import { mockCourses } from '@/lib/data';
-import { CourseList } from '@/components/course-list';
-import { Timetable } from '@/components/timetable';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { useToast } from '@/hooks/use-toast';
-import { BookOpen, CalendarDays, Mail, AlertTriangle, Info, Clock, Menu } from 'lucide-react';
-import { useSessionTimeout } from '@/hooks/use-session-timeout';
-import { SessionTimeoutModal } from '@/components/session-timeout-modal';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
+import { BookOpen, Calendar, Edit, Users, Award, BookCopy, BarChart, Settings } from 'lucide-react';
 
-const MIN_CREDITS = 17;
-const MAX_CREDITS = 27;
-
-const DAYS: Day[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-const TIME_SLOTS = Array.from({ length: 11 }, (_, i) => `${(i + 8).toString().padStart(2, '0')}:00`); // 08:00 to 18:00
-
-const HomePage: FC = () => {
-  const [timetable, setTimetable] = useState<TimetableCourse[]>([]);
-  const [departmentFilter, setDepartmentFilter] = useState<Department | 'all'>('all');
-  const [searchQuery, setSearchQuery] = useState('');
-  const { toast } = useToast();
-  const [email, setEmail] = useState('');
-  const [currentTime, setCurrentTime] = useState('');
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date().toLocaleTimeString());
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
-  const { isModalOpen, handleStay, handleLogout, active, remaining } = useSessionTimeout(15 * 60 * 1000);
-
-  const totalCredits = useMemo(() => {
-    return timetable.reduce((acc, course) => acc + course.credits, 0);
-  }, [timetable]);
-
-  const creditStatus = useMemo(() => {
-    if (totalCredits < MIN_CREDITS) return 'min';
-    if (totalCredits > MAX_CREDITS) return 'max';
-    return 'ok';
-  }, [totalCredits]);
-
-  const checkConflict = useCallback((courseToAdd: TimetableCourse, currentTimetable: TimetableCourse[]): boolean => {
-    for (const existingCourse of currentTimetable) {
-      if (courseToAdd.id !== existingCourse.id && courseToAdd.day === existingCourse.day) {
-        const startA = parseInt(courseToAdd.time.split(':')[0]);
-        const endA = startA + courseToAdd.duration;
-        const startB = parseInt(existingCourse.time.split(':')[0]);
-        const endB = startB + existingCourse.duration;
-
-        if (startA < endB && endA > startB) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }, []);
-
-  const updateConflicts = useCallback((currentTimetable: TimetableCourse[]) => {
-    return currentTimetable.map(course => ({
-      ...course,
-      hasConflict: checkConflict(course, currentTimetable),
-    }));
-  }, [checkConflict]);
-
-  const addCourse = (course: Course) => {
-    if (timetable.some(c => c.id === course.id)) {
-      toast({
-        variant: 'destructive',
-        title: 'Course Already Added',
-        description: `${course.code} is already in your timetable.`,
-      });
-      return;
-    }
-
-    // Find the first available slot
-    for (const day of DAYS) {
-      for (const time of TIME_SLOTS) {
-        const newCourse: TimetableCourse = { ...course, day, time, duration: 2 }; // Assume 2h duration
-        if (!checkConflict(newCourse, timetable)) {
-          const newTimetable = [...timetable, newCourse];
-          setTimetable(updateConflicts(newTimetable));
-          toast({
-            title: 'Course Added',
-            description: `${course.code} has been added to your timetable.`,
-          });
-          return;
-        }
-      }
-    }
-
-    toast({
-      variant: 'destructive',
-      title: 'No Available Slot',
-      description: `Could not find a free slot for ${course.code}. Please make space.`,
-    });
-  };
-
-  const removeCourse = (courseId: string) => {
-    const newTimetable = timetable.filter(c => c.id !== courseId);
-    setTimetable(updateConflicts(newTimetable));
-    const removedCourse = timetable.find(c => c.id === courseId);
-    if(removedCourse){
-      toast({
-        title: 'Course Removed',
-        description: `${removedCourse.code} has been removed from your timetable.`,
-      });
-    }
-  };
-
-  const moveCourse = (courseId: string, newDay: Day, newTime: string) => {
-    const newTimetable = timetable.map(c =>
-      c.id === courseId ? { ...c, day: newDay, time: newTime } : c
-    );
-    setTimetable(updateConflicts(newTimetable));
-  };
-  
-  const handleSendEmail = () => {
-    if(!email) {
-       toast({ variant: "destructive", title: "Email required", description: "Please enter your email address." });
-       return;
-    }
-    console.log(`Sending timetable to ${email}`);
-    toast({ title: "Timetable Sent!", description: `Your schedule has been sent to ${email}.` });
-  };
-
-  const filteredCourses = useMemo(() => {
-    return mockCourses.filter(course => {
-      const matchesDepartment = departmentFilter === 'all' || course.department === departmentFilter;
-      const matchesSearch =
-        course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        course.code.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesDepartment && matchesSearch;
-    });
-  }, [departmentFilter, searchQuery]);
-  
-  return (
-    <div className="min-h-screen w-full">
-      <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background/80 backdrop-blur-sm px-4 md:px-6 justify-between">
-        <div className="flex items-center gap-4">
-          <Link href="/" className="flex items-center gap-2">
-            <CalendarDays className="h-6 w-6 text-primary" />
-            <h1 className="text-2xl font-bold tracking-tight font-headline">CourseCraft</h1>
-          </Link>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon">
-                <Menu className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuLabel>Menu</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              <Link href="/courses" passHref>
-                <DropdownMenuItem>View Courses</DropdownMenuItem>
-              </Link>
-              <Link href="/modify" passHref>
-                <DropdownMenuItem>Modify</DropdownMenuItem>
-              </Link>
-              <Link href="/faculty" passHref>
-                <DropdownMenuItem>View Faculty List</DropdownMenuItem>
-              </Link>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-
-        <div className="flex items-center gap-4 text-sm font-medium">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-card border">
-            <Clock className="h-4 w-4 text-muted-foreground" />
-            <span className="font-semibold">{totalCredits}</span>
-            <span className="text-muted-foreground">Credits</span>
-          </div>
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-card border">
-            <Clock className="h-4 w-4 text-muted-foreground" />
-            <span className="font-semibold">{currentTime}</span>
-          </div>
-        </div>
-
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button disabled={creditStatus !== 'ok'}>
-              <Mail className="mr-2 h-4 w-4" />
-              Send to Email
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle className="font-headline">Send Timetable</DialogTitle>
-              <DialogDescription>
-                Enter your email address to receive a copy of your timetable.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="email" className="text-right">
-                  Email
-                </Label>
-                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com" className="col-span-3" />
-              </div>
-            </div>
-            <DialogFooter>
-              <Button type="submit" onClick={handleSendEmail}>Send</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </header>
-
-      <main className="grid flex-1 grid-cols-1 md:grid-cols-[350px_1fr] lg:grid-cols-[400px_1fr]">
-        <aside className="border-r bg-card flex flex-col">
-          <div className="p-4 space-y-4">
-            <div className="flex items-center gap-2">
-              <BookOpen className="h-5 w-5 text-primary" />
-              <h2 className="text-xl font-bold font-headline">Course Browser</h2>
-            </div>
-            {creditStatus !== 'ok' && (
-              <Alert variant="destructive">
-                <AlertTriangle className="h-4 w-4" />
-                <AlertTitle>Credit Limit Warning</AlertTitle>
-                <AlertDescription>
-                  You must have between {MIN_CREDITS} and {MAX_CREDITS} credits. You currently have {totalCredits}.
-                </AlertDescription>
-              </Alert>
-            )}
-             {creditStatus === 'ok' && (
-              <Alert>
-                <Info className="h-4 w-4" />
-                <AlertTitle>Credit Load is Valid</AlertTitle>
-                <AlertDescription>
-                  Your current credit load of {totalCredits} is within the acceptable range.
-                </AlertDescription>
-              </Alert>
-            )}
-          </div>
-          <CourseList
-            courses={filteredCourses}
-            onAddCourse={addCourse}
-            department={departmentFilter}
-            onDepartmentChange={setDepartmentFilter}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-          />
-        </aside>
-
-        <section className="p-4 md:p-6">
-          <Timetable
-            days={DAYS}
-            timeSlots={TIME_SLOTS}
-            timetableCourses={timetable}
-            onMoveCourse={moveCourse}
-            onRemoveCourse={removeCourse}
-          />
-        </section>
-      </main>
-      <SessionTimeoutModal isOpen={isModalOpen} onStay={handleStay} onLogout={handleLogout} remainingTime={remaining} />
-    </div>
-  );
+const student = {
+  name: 'Alex Doe',
+  id: '123456',
+  email: 'alex.doe@university.edu',
+  avatar: 'https://i.pravatar.cc/150?u=alexdoe',
+  major: 'Computer Science',
+  year: '3rd Year',
+  semester: 'Fall 2024',
+  creditsCompleted: 78,
+  creditsRequired: 120,
 };
 
-export default HomePage;
+const quickLinks = [
+  { href: '/scheduler', label: 'Plan my Schedule', icon: Calendar },
+  { href: '/courses', label: 'Browse Courses', icon: BookOpen },
+  { href: '/faculty', label: 'View Faculty', icon: Users },
+  { href: '/modify', label: 'Modify Courses', icon: Edit },
+];
+
+const completedCourses = [
+    { code: 'CS 101', title: 'Intro to Programming', credits: 4, grade: 'A' },
+    { code: 'MATH 150', title: 'Calculus I', credits: 5, grade: 'B+' },
+    { code: 'PHY 100', title: 'Classical Mechanics', credits: 4, grade: 'A-' },
+    { code: 'HUM 120', title: 'World History', credits: 3, grade: 'B' },
+];
+
+export default function DashboardPage() {
+    const creditProgress = (student.creditsCompleted / student.creditsRequired) * 100;
+
+  return (
+    <div className="min-h-screen bg-background text-foreground">
+      <header className="sticky top-0 z-10 flex items-center h-16 px-4 border-b bg-background/80 backdrop-blur-sm md:px-6 justify-between">
+        <div className="flex items-center gap-4">
+          <Link href="/" className="flex items-center gap-2">
+            <BookCopy className="h-6 w-6 text-primary" />
+            <h1 className="text-2xl font-bold tracking-tight font-headline">CourseCraft Dashboard</h1>
+          </Link>
+        </div>
+        <div className="flex items-center gap-4">
+            <span className="text-sm font-medium text-muted-foreground hidden sm:inline-block">{student.name}</span>
+            <Avatar className="w-9 h-9">
+              <AvatarImage src={student.avatar} alt={student.name} />
+              <AvatarFallback>{student.name.charAt(0)}</AvatarFallback>
+            </Avatar>
+        </div>
+      </header>
+
+      <main className="grid flex-1 gap-6 p-4 md:grid-cols-3 lg:grid-cols-4 md:p-6">
+        <div className="lg:col-span-3 md:col-span-2 space-y-6">
+            <Card>
+                <CardHeader>
+                    <CardTitle className="font-headline text-2xl">Welcome back, {student.name.split(' ')[0]}!</CardTitle>
+                    <CardDescription>Here's your academic overview for {student.semester}.</CardDescription>
+                </CardHeader>
+                <CardContent className="grid gap-6 sm:grid-cols-2">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardTitle className="text-sm font-medium">Degree Progress</CardTitle>
+                            <Award className="w-4 h-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{student.creditsCompleted} / {student.creditsRequired}</div>
+                            <p className="text-xs text-muted-foreground">credits completed</p>
+                            <Progress value={creditProgress} className="mt-2 h-2" />
+                        </CardContent>
+                    </Card>
+                     <Card>
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardTitle className="text-sm font-medium">Current Semester</CardTitle>
+                             <Calendar className="w-4 h-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{student.semester}</div>
+                            <p className="text-xs text-muted-foreground">{student.major} &bull; {student.year}</p>
+                        </CardContent>
+                    </Card>
+                </CardContent>
+            </Card>
+             <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2 font-headline">
+                        <BookOpen className="w-5 h-5 text-primary" />
+                        Recently Completed Courses
+                    </CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <div className="space-y-4">
+                        {completedCourses.map(course => (
+                            <div key={course.code} className="flex justify-between items-center p-3 rounded-lg bg-muted/50">
+                                <div>
+                                    <p className="font-semibold">{course.title} <span className="text-sm font-normal text-muted-foreground font-code">({course.code})</span></p>
+                                    <p className="text-sm text-muted-foreground">{course.credits} Credits</p>
+                                </div>
+                                <div className="text-right">
+                                    <p className="font-bold text-lg text-primary">{course.grade}</p>
+                                    <p className="text-xs text-muted-foreground">Grade</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
+
+        <aside className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 font-headline">
+                <Settings className="w-5 h-5 text-primary" />
+                Quick Actions
+                </CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-2 gap-4">
+              {quickLinks.map((link) => (
+                <Link key={link.href} href={link.href} passHref>
+                  <Button variant="outline" className="flex flex-col items-center justify-center h-24 text-center w-full p-2">
+                    <link.icon className="w-6 h-6 mb-2" />
+                    <span className="text-xs font-semibold leading-tight">{link.label}</span>
+                  </Button>
+                </Link>
+              ))}
+            </CardContent>
+          </Card>
+           <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 font-headline">
+                <BarChart className="w-5 h-5 text-primary" />
+                Student Analytics
+                </CardTitle>
+            </CardHeader>
+            <CardContent>
+                <p className="text-sm text-center text-muted-foreground p-4">
+                    Charts and analytics coming soon.
+                </p>
+            </CardContent>
+          </Card>
+        </aside>
+      </main>
+    </div>
+  );
+}
