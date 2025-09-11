@@ -22,7 +22,7 @@ export const users: User[] = [
     {
         id: 'stu001',
         email: 'alex.doe@university.edu',
-        password: 'password123',
+        password: 'cGFzc3dvcmQxMjM=', // password123
         role: 'student',
         profile: {
             name: 'Alex Doe',
@@ -37,7 +37,7 @@ export const users: User[] = [
     {
         id: 'stu002',
         email: 'brian.smith@university.edu',
-        password: 'password123',
+        password: 'cGFzc3dvcmQxMjM=', // password123
         role: 'student',
         profile: {
             name: 'Brian Smith',
@@ -52,7 +52,7 @@ export const users: User[] = [
     {
         id: 'stu003',
         email: 'casey.jones@university.edu',
-        password: 'password123',
+        password: 'cGFzc3dvcmQxMjM=', // password123
         role: 'student',
         profile: {
             name: 'Casey Jones',
@@ -67,7 +67,7 @@ export const users: User[] = [
     {
         id: 'stu004',
         email: 'diana.prince@university.edu',
-        password: 'password123',
+        password: 'cGFzc3dvcmQxMjM=', // password123
         role: 'student',
         profile: {
             name: 'Diana Prince',
@@ -82,7 +82,7 @@ export const users: User[] = [
     {
         id: 'stu005',
         email: 'edward.nygma@university.edu',
-        password: 'password123',
+        password: 'cGFzc3dvcmQxMjM=', // password123
         role: 'student',
         profile: {
             name: 'Edward Nygma',
@@ -98,7 +98,7 @@ export const users: User[] = [
     {
         id: 'adm001',
         email: 'admin.one@university.edu',
-        password: 'adminpass',
+        password: 'YWRtaW5wYXNz', // adminpass
         role: 'admin',
         profile: {
             name: 'Admin One',
@@ -113,7 +113,7 @@ export const users: User[] = [
     {
         id: 'adm002',
         email: 'admin.two@university.edu',
-        password: 'adminpass',
+        password: 'YWRtaW5wYXNz', // adminpass
         role: 'admin',
         profile: {
             name: 'Admin Two',
