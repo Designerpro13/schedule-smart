@@ -31,6 +31,7 @@ import { Shield, BookCopy, Users, BarChart, Settings, LogOut, Edit, Trash2, Aler
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 
 export default function AdminDashboardPage() {
@@ -41,9 +42,15 @@ export default function AdminDashboardPage() {
   const [courses, setCourses] = useState<Course[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [updatedCourseData, setUpdatedCourseData] = useState<{ credits: number; description: string }>({ credits: 0, description: '' });
+
+  const [isManageUserDialogOpen, setIsManageUserDialogOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const [updatedUserRole, setUpdatedUserRole] = useState<'student' | 'admin'>('student');
+
 
   useEffect(() => {
     if (!user) {
@@ -83,7 +90,7 @@ export default function AdminDashboardPage() {
     router.push('/login');
   };
 
-  const handleEditClick = (course: Course) => {
+  const handleEditCourseClick = (course: Course) => {
     setSelectedCourse(course);
     setUpdatedCourseData({ credits: course.credits, description: course.description });
     setIsEditDialogOpen(true);
@@ -111,6 +118,28 @@ export default function AdminDashboardPage() {
       description: 'The course has been removed from the list.',
     });
   };
+  
+  const handleManageUserClick = (userToManage: User) => {
+    setSelectedUser(userToManage);
+    setUpdatedUserRole(userToManage.role);
+    setIsManageUserDialogOpen(true);
+  };
+
+  const handleUpdateUserRole = () => {
+    if (!selectedUser) return;
+    const updatedUsers = users.map(u =>
+      u.id === selectedUser.id ? { ...u, role: updatedUserRole } : u
+    );
+    setUsers(updatedUsers);
+
+    toast({
+      title: 'User Role Updated',
+      description: `${selectedUser.profile.name}'s role has been changed to ${updatedUserRole}.`,
+    });
+    setIsManageUserDialogOpen(false);
+    setSelectedUser(null);
+  };
+
 
   if (!user || user.role !== 'admin') {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
@@ -177,7 +206,7 @@ export default function AdminDashboardPage() {
                           <TableCell>{course.department}</TableCell>
                           <TableCell>{course.credits}</TableCell>
                           <TableCell className="text-right">
-                            <Button variant="outline" size="sm" className="mr-2" onClick={() => handleEditClick(course)}>
+                            <Button variant="outline" size="sm" className="mr-2" onClick={() => handleEditCourseClick(course)}>
                               <Edit className="h-4 w-4 mr-2" />
                               Edit
                             </Button>
@@ -240,7 +269,7 @@ export default function AdminDashboardPage() {
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right">
-                             <Button variant="outline" size="sm">
+                             <Button variant="outline" size="sm" onClick={() => handleManageUserClick(u)} disabled={user?.id === u.id}>
                                <UserCog className="h-4 w-4 mr-2" />
                                Manage
                             </Button>
@@ -342,6 +371,38 @@ export default function AdminDashboardPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      
+      <Dialog open={isManageUserDialogOpen} onOpenChange={setIsManageUserDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Manage User: {selectedUser?.profile.name}</DialogTitle>
+            <DialogDescription>
+              Update user details here. Click save to apply changes.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="user-role" className="text-right">
+                Role
+              </Label>
+              <Select value={updatedUserRole} onValueChange={(value: 'student' | 'admin') => setUpdatedUserRole(value)}>
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select a role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="student">Student</SelectItem>
+                  <SelectItem value="admin">Admin</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsManageUserDialogOpen(false)}>Cancel</Button>
+            <Button type="submit" onClick={handleUpdateUserRole}>Save Changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }
