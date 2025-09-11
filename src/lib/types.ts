@@ -7,6 +7,7 @@ export type Course = {
   credits: number;
   department: Department;
   description: string;
+  facultyId?: string; // Optional faculty ID
 };
 
 export type TimetableCourse = Course & {

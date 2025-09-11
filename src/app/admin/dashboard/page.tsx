@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'next/navigation';
-import type { Course, User } from '@/lib/types';
+import type { Course, User, Faculty, Department } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -21,18 +21,30 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Shield, BookCopy, Users, BarChart, Settings, LogOut, Edit, Trash2, AlertTriangle, UserCog } from 'lucide-react';
+import { Shield, BookCopy, Users, BarChart, Settings, LogOut, Edit, Trash2, AlertTriangle, UserCog, PlusCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
 
+
+const initialNewCourseData = {
+  id: '',
+  code: '',
+  title: '',
+  credits: 3,
+  department: 'Computer Science' as Department,
+  description: '',
+  facultyId: '',
+};
 
 export default function AdminDashboardPage() {
   const { user, logout } = useAuth();
@@ -41,6 +53,7 @@ export default function AdminDashboardPage() {
   
   const [courses, setCourses] = useState<Course[]>([]);
   const [users, setUsers] = useState<User[]>([]);
+  const [faculty, setFaculty] = useState<Faculty[]>([]);
   const [loading, setLoading] = useState(true);
   
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -50,6 +63,9 @@ export default function AdminDashboardPage() {
   const [isManageUserDialogOpen, setIsManageUserDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [updatedUserRole, setUpdatedUserRole] = useState<'student' | 'admin'>('student');
+
+  const [isAddCourseDialogOpen, setIsAddCourseDialogOpen] = useState(false);
+  const [newCourseData, setNewCourseData] = useState(initialNewCourseData);
 
 
   useEffect(() => {
@@ -65,14 +81,17 @@ export default function AdminDashboardPage() {
   const fetchAdminData = async () => {
     setLoading(true);
     try {
-      const [coursesRes, usersRes] = await Promise.all([
+      const [coursesRes, usersRes, facultyRes] = await Promise.all([
         fetch('/api/courses'),
         fetch('/api/users'),
+        fetch('/api/faculty'),
       ]);
       const coursesData = await coursesRes.json();
       const usersData = await usersRes.json();
+      const facultyData = await facultyRes.json();
       setCourses(coursesData);
       setUsers(usersData);
+      setFaculty(facultyData);
     } catch (error) {
       console.error('Failed to fetch admin data', error);
       toast({
@@ -112,7 +131,20 @@ export default function AdminDashboardPage() {
   };
   
   const handleDeleteCourse = (courseId: string) => {
+    const courseToRemove = courses.find(c => c.id === courseId);
+    if (!courseToRemove) return;
+
     setCourses(courses.filter(c => c.id !== courseId));
+
+    if (courseToRemove.facultyId) {
+      setFaculty(faculty.map(f => {
+        if (f.id === courseToRemove.facultyId) {
+          return { ...f, subjects: f.subjects.filter(s => s !== courseToRemove.code) };
+        }
+        return f;
+      }));
+    }
+
     toast({
       title: 'Course Removed',
       description: 'The course has been removed from the list.',
@@ -138,6 +170,31 @@ export default function AdminDashboardPage() {
     });
     setIsManageUserDialogOpen(false);
     setSelectedUser(null);
+  };
+  
+  const handleAddNewCourse = () => {
+    const newCourse: Course = {
+      ...newCourseData,
+      id: `course_${Date.now()}`,
+    };
+    
+    setCourses([...courses, newCourse]);
+
+    if (newCourse.facultyId) {
+      setFaculty(faculty.map(f => {
+        if (f.id === newCourse.facultyId) {
+          return { ...f, subjects: [...f.subjects, newCourse.code] };
+        }
+        return f;
+      }));
+    }
+
+    toast({
+      title: 'Course Added',
+      description: `${newCourse.code} - ${newCourse.title} has been added.`,
+    });
+    setIsAddCourseDialogOpen(false);
+    setNewCourseData(initialNewCourseData);
   };
 
 
@@ -172,9 +229,15 @@ export default function AdminDashboardPage() {
           
           <TabsContent value="courses">
             <Card>
-              <CardHeader>
-                <CardTitle>All Courses</CardTitle>
-                <CardDescription>View, edit, or remove courses from the catalog.</CardDescription>
+              <CardHeader className='flex-row items-center justify-between'>
+                <div>
+                  <CardTitle>All Courses</CardTitle>
+                  <CardDescription>View, edit, or remove courses from the catalog.</CardDescription>
+                </div>
+                 <Button onClick={() => setIsAddCourseDialogOpen(true)}>
+                    <PlusCircle className="h-4 w-4 mr-2" />
+                    Add Course
+                </Button>
               </CardHeader>
               <CardContent>
                 <Table>
@@ -184,6 +247,7 @@ export default function AdminDashboardPage() {
                       <TableHead>Title</TableHead>
                       <TableHead>Department</TableHead>
                       <TableHead>Credits</TableHead>
+                      <TableHead>Faculty</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -195,6 +259,7 @@ export default function AdminDashboardPage() {
                           <TableCell><Skeleton className="h-5 w-48" /></TableCell>
                           <TableCell><Skeleton className="h-5 w-32" /></TableCell>
                           <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                          <TableCell><Skeleton className="h-5 w-32" /></TableCell>
                           <TableCell className="text-right"><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
                         </TableRow>
                       ))
@@ -205,6 +270,7 @@ export default function AdminDashboardPage() {
                           <TableCell>{course.title}</TableCell>
                           <TableCell>{course.department}</TableCell>
                           <TableCell>{course.credits}</TableCell>
+                          <TableCell>{faculty.find(f => f.id === course.facultyId)?.name || 'N/A'}</TableCell>
                           <TableCell className="text-right">
                             <Button variant="outline" size="sm" className="mr-2" onClick={() => handleEditCourseClick(course)}>
                               <Edit className="h-4 w-4 mr-2" />
@@ -357,11 +423,11 @@ export default function AdminDashboardPage() {
               <Label htmlFor="description" className="text-right">
                 Description
               </Label>
-               <textarea
+               <Textarea
                  id="description"
                  value={updatedCourseData.description}
                  onChange={(e) => setUpdatedCourseData({ ...updatedCourseData, description: e.target.value })}
-                 className="col-span-3 min-h-[100px] p-2 border rounded-md"
+                 className="col-span-3 min-h-[100px]"
                />
             </div>
           </div>
@@ -403,6 +469,65 @@ export default function AdminDashboardPage() {
         </DialogContent>
       </Dialog>
 
+      <Dialog open={isAddCourseDialogOpen} onOpenChange={setIsAddCourseDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add New Course</DialogTitle>
+            <DialogDescription>
+              Enter the details for the new course and assign a faculty member.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="new-code" className="text-right">Code</Label>
+              <Input id="new-code" value={newCourseData.code} onChange={(e) => setNewCourseData({...newCourseData, code: e.target.value})} className="col-span-3" />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="new-title" className="text-right">Title</Label>
+              <Input id="new-title" value={newCourseData.title} onChange={(e) => setNewCourseData({...newCourseData, title: e.target.value})} className="col-span-3" />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="new-credits" className="text-right">Credits</Label>
+              <Input id="new-credits" type="number" value={newCourseData.credits} onChange={(e) => setNewCourseData({...newCourseData, credits: parseInt(e.target.value, 10) || 0})} className="col-span-3" />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="new-department" className="text-right">Department</Label>
+              <Select value={newCourseData.department} onValueChange={(value: Department) => setNewCourseData({...newCourseData, department: value})}>
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Select a department" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="Computer Science">Computer Science</SelectItem>
+                  <SelectItem value="Mathematics">Mathematics</SelectItem>
+                  <SelectItem value="Physics">Physics</SelectItem>
+                  <SelectItem value="Humanities">Humanities</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+             <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="new-faculty" className="text-right">Faculty</Label>
+              <Select value={newCourseData.facultyId} onValueChange={(value: string) => setNewCourseData({...newCourseData, facultyId: value})}>
+                <SelectTrigger className="col-span-3">
+                  <SelectValue placeholder="Assign a faculty member" />
+                </SelectTrigger>
+                <SelectContent>
+                  {faculty.map(f => (
+                     <SelectItem key={f.id} value={f.id}>{f.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="new-description" className="text-right">Description</Label>
+              <Textarea id="new-description" value={newCourseData.description} onChange={(e) => setNewCourseData({...newCourseData, description: e.target.value})} className="col-span-3 min-h-[100px]" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddCourseDialogOpen(false)}>Cancel</Button>
+            <Button type="submit" onClick={handleAddNewCourse}>Add Course</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

@@ -8,6 +8,7 @@ export const mockCourses: Course[] = [
     credits: 4,
     department: 'Computer Science',
     description: 'Learn the fundamentals of programming using Python. Covers variables, control flow, functions, and basic data structures.',
+    facultyId: 'fac001',
   },
   {
     id: 'cs202',
@@ -16,6 +17,7 @@ export const mockCourses: Course[] = [
     credits: 4,
     department: 'Computer Science',
     description: 'A deep dive into common data structures like trees, graphs, and hash tables, along with fundamental algorithms.',
+    facultyId: 'fac001',
   },
   {
     id: 'cs303',
@@ -24,6 +26,7 @@ export const mockCourses: Course[] = [
     credits: 3,
     department: 'Computer Science',
     description: 'Understand the core concepts of operating systems, including processes, threads, memory management, and file systems.',
+    facultyId: 'fac002',
   },
   {
     id: 'math150',
@@ -32,6 +35,7 @@ export const mockCourses: Course[] = [
     credits: 5,
     department: 'Mathematics',
     description: 'An introduction to differential calculus. Topics include limits, derivatives, and their applications.',
+    facultyId: 'fac003',
   },
   {
     id: 'math250',
@@ -40,6 +44,7 @@ export const mockCourses: Course[] = [
     credits: 4,
     department: 'Mathematics',
     description: 'Explore vector spaces, matrices, determinants, eigenvalues, and their applications in science and engineering.',
+    facultyId: 'fac004',
   },
   {
     id: 'phy100',
@@ -48,6 +53,7 @@ export const mockCourses: Course[] = [
     credits: 4,
     department: 'Physics',
     description: 'Study the motion of objects using Newtonian mechanics. Covers kinematics, dynamics, energy, and momentum.',
+    facultyId: 'fac003',
   },
   {
     id: 'phy210',
@@ -56,6 +62,7 @@ export const mockCourses: Course[] = [
     credits: 4,
     department: 'Physics',
     description: 'An introduction to electric and magnetic fields, Maxwell\'s equations, and electromagnetic waves.',
+    facultyId: 'fac005',
   },
   {
     id: 'hum120',
@@ -64,6 +71,7 @@ export const mockCourses: Course[] = [
     credits: 3,
     department: 'Humanities',
     description: 'A survey of major world civilizations from prehistory to the medieval period.',
+    facultyId: 'fac006',
   },
   {
     id: 'hum300',
@@ -72,6 +80,7 @@ export const mockCourses: Course[] = [
     credits: 3,
     department: 'Humanities',
     description: 'Examines contemporary ethical dilemmas through the lens of major philosophical theories.',
+    facultyId: 'fac006',
   },
    {
     id: 'cs404',
@@ -80,6 +89,7 @@ export const mockCourses: Course[] = [
     credits: 3,
     department: 'Computer Science',
     description: 'An in-depth look at network protocols, architecture, and applications. OSI and TCP/IP models.',
+    facultyId: 'fac002',
   },
   {
     id: 'math320',
@@ -88,6 +98,7 @@ export const mockCourses: Course[] = [
     credits: 3,
     department: 'Mathematics',
     description: 'Foundations of probability, random variables, distributions, and stochastic processes.',
+    facultyId: 'fac004',
   },
   {
     id: 'phy350',
@@ -96,6 +107,7 @@ export const mockCourses: Course[] = [
     credits: 4,
     department: 'Physics',
     description: 'Introduction to the principles of quantum mechanics, including wave-particle duality and the Schrödinger equation.',
+    facultyId: 'fac005',
   },
 ];
 
