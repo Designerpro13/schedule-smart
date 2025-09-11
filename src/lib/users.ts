@@ -26,7 +26,7 @@ export const users: User[] = [
         role: 'student',
         profile: {
             name: 'Alex Doe',
-            avatar: 'https://i.pravatar.cc/150?u=alexdoe',
+            avatar: 'https://picsum.photos/seed/alexdoe/150/150',
             semester: 'Fall 2024',
             major: 'Computer Science',
             year: '3rd Year',
@@ -41,7 +41,7 @@ export const users: User[] = [
         role: 'student',
         profile: {
             name: 'Brian Smith',
-            avatar: 'https://i.pravatar.cc/150?u=briansmith',
+            avatar: 'https://picsum.photos/seed/briansmith/150/150',
             semester: 'Fall 2024',
             major: 'Physics',
             year: '2nd Year',
@@ -56,7 +56,7 @@ export const users: User[] = [
         role: 'student',
         profile: {
             name: 'Casey Jones',
-            avatar: 'https://i.pravatar.cc/150?u=caseyjones',
+            avatar: 'https://picsum.photos/seed/caseyjones/150/150',
             semester: 'Fall 2024',
             major: 'Humanities',
             year: '4th Year',
@@ -71,7 +71,7 @@ export const users: User[] = [
         role: 'student',
         profile: {
             name: 'Diana Prince',
-            avatar: 'https://i.pravatar.cc/150?u=dianaprince',
+            avatar: 'https://picsum.photos/seed/dianaprince/150/150',
             semester: 'Fall 2024',
             major: 'Mathematics',
             year: '3rd Year',
@@ -86,7 +86,7 @@ export const users: User[] = [
         role: 'student',
         profile: {
             name: 'Edward Nygma',
-            avatar: 'https://i.pravatar.cc/150?u=edwardnygma',
+            avatar: 'https://picsum.photos/seed/edwardnygma/150/150',
             semester: 'Fall 2024',
             major: 'Computer Science',
             year: '1st Year',
@@ -102,7 +102,7 @@ export const users: User[] = [
         role: 'admin',
         profile: {
             name: 'Admin One',
-            avatar: 'https://i.pravatar.cc/150?u=adminone',
+            avatar: 'https://picsum.photos/seed/adminone/150/150',
             semester: 'N/A',
             major: 'Administration',
             year: 'Staff',
@@ -117,7 +117,7 @@ export const users: User[] = [
         role: 'admin',
         profile: {
             name: 'Admin Two',
-            avatar: 'https://i.pravatar.cc/150?u=admintwo',
+            avatar: 'https://picsum.photos/seed/admintwo/150/150',
             semester: 'N/A',
             major: 'Administration',
             year: 'Staff',

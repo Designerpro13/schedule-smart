@@ -25,7 +25,7 @@ export default function FacultyPage() {
             <Card key={faculty.id} className="flex flex-col">
               <CardHeader className="items-center text-center">
                  <Avatar className="w-24 h-24 mb-4">
-                  <AvatarImage src={`https://i.pravatar.cc/150?u=${faculty.id}`} alt={faculty.name} />
+                  <AvatarImage src={`https://picsum.photos/seed/${faculty.id}/150/150`} alt={faculty.name} />
                   <AvatarFallback>{faculty.name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <CardTitle className="font-headline text-xl">{faculty.name}</CardTitle>
