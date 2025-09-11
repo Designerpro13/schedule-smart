@@ -30,7 +30,11 @@ export default function LoginPage() {
         title: 'Login Successful',
         description: `Welcome back, ${user.name}!`,
       });
-      router.push('/');
+      if (user.role === 'admin') {
+        router.push('/admin/dashboard');
+      } else {
+        router.push('/');
+      }
     } catch (err: any) {
       setError(err.message);
       toast({
@@ -43,7 +47,7 @@ export default function LoginPage() {
     }
   };
 
-  const handleBypass = async () => {
+  const handleStudentBypass = async () => {
     setLoading(true);
     try {
       const user = await login('alex.doe@university.edu', 'password123');
@@ -52,6 +56,27 @@ export default function LoginPage() {
         description: `Logged in as ${user.name} for debugging.`,
       });
       router.push('/');
+    } catch (err: any) {
+      setError('Bypass failed. Check hardcoded credentials.');
+      toast({
+        variant: 'destructive',
+        title: 'Bypass Login Failed',
+        description: err.message,
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  const handleAdminBypass = async () => {
+    setLoading(true);
+    try {
+      const user = await login('admin.one@university.edu', 'adminpass');
+      toast({
+        title: 'Bypass Successful',
+        description: `Logged in as ${user.name} for debugging.`,
+      });
+      router.push('/admin/dashboard');
     } catch (err: any) {
       setError('Bypass failed. Check hardcoded credentials.');
       toast({
@@ -115,8 +140,11 @@ export default function LoginPage() {
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? 'Signing In...' : 'Sign In'}
             </Button>
-            <Button type="button" variant="secondary" className="w-full" onClick={handleBypass} disabled={loading}>
-              Bypass Login (Debug)
+            <Button type="button" variant="secondary" className="w-full" onClick={handleStudentBypass} disabled={loading}>
+              Bypass as Student (Debug)
+            </Button>
+             <Button type="button" variant="secondary" className="w-full" onClick={handleAdminBypass} disabled={loading}>
+              Bypass as Admin (Debug)
             </Button>
           </CardFooter>
         </form>
