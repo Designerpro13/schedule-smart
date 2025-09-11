@@ -101,3 +101,26 @@ graph TD
         Q -->|R/U| S(Tickets API);
     end
 ```
+
+---
+
+## 6. System Testing
+
+### 6.1 Test Cases & Mock Results
+
+This section outlines test cases for the functional requirements defined above.
+
+| Test Case ID | Requirement | Test Description | Expected Result | Mock Result |
+| :--- | :--- | :--- | :--- | :--- |
+| TC-01 | FR-01 | A user attempts to log in with valid credentials for a 'student' role. | The user is authenticated and redirected to their student dashboard (`/`). | **PASS** |
+| TC-02 | FR-01 | A user attempts to log in with invalid credentials. | An error message "Invalid email or password" is displayed on the login form. | **PASS** |
+| TC-03 | FR-02 | A user with the 'admin' role logs in successfully. | The user is redirected to the admin dashboard (`/admin/dashboard`). | **PASS** |
+| TC-04 | FR-02 | A user with the 'techy' role logs in successfully. | The user is redirected to the tech support dashboard (`/techy/dashboard`). | **PASS** |
+| TC-05 | FR-03 | A logged-in user closes and reopens the browser. | The user remains logged in and their dashboard is displayed. | **PASS** |
+| TC-06 | FR-05 | A student drags a course from the course list onto the timetable grid. | The course appears in the correct time slot on the timetable. | **PASS** |
+| TC-07 | FR-06 | A student adds a course that conflicts with an existing one. | The conflicting course card is highlighted with a red border and warning icon. | **PASS** |
+| TC-08 | FR-08 | An admin successfully adds a new course using the "Add Course" dialog. | The new course appears in the "All Courses" table. | **PASS** |
+| TC-09 | FR-09 | An admin changes a user's role from 'student' to 'admin'. | The user's role is updated in the "User Accounts" table. | **PASS** |
+| TC-10 | FR-10 | A tech support user navigates to the "System Logs" tab. | A list of system event logs is displayed in the log viewer. | **PASS** |
+| TC-11 | FR-11 | A tech support user changes the status of a ticket from 'Open' to 'In Progress'. | The ticket's status is updated in the "Support Tickets" table. | **PASS** |
+| TC-12 | NFR-04 | The application is viewed on a mobile device screen size. | The layout adjusts correctly, elements are readable, and navigation is functional. | **PASS** |
