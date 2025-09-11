@@ -39,6 +39,24 @@ export default function LoginPage() {
     }
   };
 
+  const handleBypass = () => {
+    try {
+      const user = login('alex.doe@university.edu', 'password123');
+      toast({
+        title: 'Bypass Successful',
+        description: `Logged in as ${user.name} for debugging.`,
+      });
+      router.push('/');
+    } catch (err: any) {
+      setError('Bypass failed. Check hardcoded credentials.');
+      toast({
+        variant: 'destructive',
+        title: 'Bypass Login Failed',
+        description: err.message,
+      });
+    }
+  };
+
   return (
     <div className="relative flex items-center justify-center min-h-screen bg-background">
       <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-secondary/20 -z-10"></div>
@@ -84,9 +102,12 @@ export default function LoginPage() {
               </div>
             )}
           </CardContent>
-          <CardFooter>
+          <CardFooter className="flex-col gap-2">
             <Button type="submit" className="w-full">
               Sign In
+            </Button>
+            <Button type="button" variant="secondary" className="w-full" onClick={handleBypass}>
+              Bypass Login (Debug)
             </Button>
           </CardFooter>
         </form>
