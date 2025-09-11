@@ -59,7 +59,7 @@ export default function LoginPage() {
       });
       router.push('/');
     } catch (err: any) {
-      setError('Bypass failed. Check hardcoded credentials.');
+      setError('Bypass login failed.');
       toast({
         variant: 'destructive',
         title: 'Bypass Login Failed',
@@ -80,7 +80,7 @@ export default function LoginPage() {
       });
       router.push('/admin/dashboard');
     } catch (err: any) {
-      setError('Bypass failed. Check hardcoded credentials.');
+      setError('Bypass login failed.');
       toast({
         variant: 'destructive',
         title: 'Bypass Login Failed',
