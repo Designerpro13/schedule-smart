@@ -1,4 +1,4 @@
-# CourseCraft: A Modern Course Scheduler
+# Schedule Smart: A Modern Course Scheduler
 
 CourseCraft is a web-based application designed to help university students plan and manage their academic schedules. It provides an intuitive interface for browsing courses, creating timetables, and tracking academic progress.
 
