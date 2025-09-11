@@ -18,6 +18,7 @@ For a detailed breakdown of the project's features, requirements, and technical 
 - **Language:** TypeScript
 - **Styling:** Tailwind CSS
 - **UI Components:** ShadCN/UI, Lucide React (for icons)
+- **Backend Services:** Firebase (for authentication and as a database placeholder)
 - **State Management:** React Context API (for authentication)
 - **Authentication:** Client-side authentication with session management.
 
