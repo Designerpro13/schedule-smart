@@ -13,7 +13,7 @@ export interface User {
     id: string;
     email: string;
     password: string; // In a real app, this would be a hash
-    role: 'student' | 'admin';
+    role: 'student' | 'admin' | 'techy';
     profile: UserProfile;
 }
 
@@ -125,4 +125,20 @@ export const users: User[] = [
             creditsRequired: 0,
         },
     },
+    // Techy
+    {
+        id: 'tech001',
+        email: 'tech.one@university.edu',
+        password: 'dGVjaHlwYXNz', // techypass
+        role: 'techy',
+        profile: {
+            name: 'Tech One',
+            avatar: 'https://picsum.photos/seed/techone/150/150',
+            semester: 'N/A',
+            major: 'IT Support',
+            year: 'Staff',
+            creditsCompleted: 0,
+            creditsRequired: 0,
+        },
+    }
 ];

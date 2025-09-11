@@ -55,6 +55,25 @@ export interface User {
     // The password should not be sent to the client, 
     // but it's part of the base type.
     password?: string; 
-    role: 'student' | 'admin';
+    role: 'student' | 'admin' | 'techy';
     profile: UserProfile;
 }
+
+export type SystemLog = {
+  id: string;
+  timestamp: string;
+  level: 'INFO' | 'WARN' | 'ERROR' | 'DEBUG';
+  message: string;
+  user: string;
+};
+
+export type TicketStatus = 'Open' | 'In Progress' | 'Closed' | 'Resolved';
+
+export type SupportTicket = {
+  id: string;
+  subject: string;
+  requester: string;
+  requester_email: string;
+  submitted: string;
+  status: TicketStatus;
+};

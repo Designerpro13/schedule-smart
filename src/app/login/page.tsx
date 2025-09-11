@@ -4,7 +4,7 @@
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { User, Shield } from 'lucide-react';
+import { User, Shield, Wrench } from 'lucide-react';
 
 export default function LoginSelectionPage() {
   return (
@@ -27,6 +27,12 @@ export default function LoginSelectionPage() {
             <Button variant="secondary" className="w-full" size="lg">
               <Shield className="mr-2" />
               I am an Admin
+            </Button>
+          </Link>
+          <Link href="/login/techy" passHref>
+            <Button variant="outline" className="w-full" size="lg">
+              <Wrench className="mr-2" />
+              I am a Tech Support
             </Button>
           </Link>
         </CardContent>

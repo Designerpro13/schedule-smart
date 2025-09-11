@@ -15,6 +15,8 @@ export default function DashboardPage() {
             router.push('/login');
         } else if (user.role === 'admin') {
             router.push('/admin/dashboard');
+        } else if (user.role === 'techy') {
+            router.push('/techy/dashboard');
         }
     }, [user, router]);
 
