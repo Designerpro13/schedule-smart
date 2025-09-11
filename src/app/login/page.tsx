@@ -8,14 +8,16 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { BookCopy, AlertTriangle } from 'lucide-react';
+import { BookCopy, AlertTriangle, Settings } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Separator } from '@/components/ui/separator';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showBypass, setShowBypass] = useState(false);
   const { login } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
@@ -140,12 +142,23 @@ export default function LoginPage() {
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? 'Signing In...' : 'Sign In'}
             </Button>
-            <Button type="button" variant="secondary" className="w-full" onClick={handleStudentBypass} disabled={loading}>
-              Bypass as Student (Debug)
-            </Button>
-             <Button type="button" variant="secondary" className="w-full" onClick={handleAdminBypass} disabled={loading}>
-              Bypass as Admin (Debug)
-            </Button>
+            {showBypass && (
+              <>
+                <p className="text-xs text-muted-foreground pt-2">Debug Options</p>
+                <Button type="button" variant="secondary" className="w-full" onClick={handleStudentBypass} disabled={loading}>
+                  Bypass as Student
+                </Button>
+                <Button type="button" variant="secondary" className="w-full" onClick={handleAdminBypass} disabled={loading}>
+                  Bypass as Admin
+                </Button>
+              </>
+            )}
+             <Separator className="my-2" />
+             <div className="w-full flex justify-end">
+                <Button variant="ghost" size="icon" onClick={() => setShowBypass(!showBypass)} className="h-7 w-7 text-muted-foreground">
+                    <Settings className="h-4 w-4" />
+                </Button>
+             </div>
           </CardFooter>
         </form>
       </Card>
