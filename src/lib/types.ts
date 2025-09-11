@@ -37,3 +37,23 @@ export type PastTimetable = {
   semester: string;
   courses: PastCourse[];
 };
+
+export interface UserProfile {
+    name: string;
+    avatar: string;
+    semester: string;
+    major: string;
+    year: string;
+    creditsCompleted: number;
+    creditsRequired: number;
+}
+
+export interface User {
+    id: string;
+    email: string;
+    // The password should not be sent to the client, 
+    // but it's part of the base type.
+    password?: string; 
+    role: 'student' | 'admin';
+    profile: UserProfile;
+}

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/context/auth-context';
 import { useRouter } from 'next/navigation';
-import type { Course } from '@/lib/types';
+import type { Course, User } from '@/lib/types';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -21,13 +21,17 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Shield, BookCopy, Users, BarChart, Settings, LogOut, Edit, Trash2 } from 'lucide-react';
+import { Shield, BookCopy, Users, BarChart, Settings, LogOut, Edit, Trash2, AlertTriangle, UserCog } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+
 
 export default function AdminDashboardPage() {
   const { user, logout } = useAuth();
@@ -35,6 +39,7 @@ export default function AdminDashboardPage() {
   const { toast } = useToast();
   
   const [courses, setCourses] = useState<Course[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
@@ -44,25 +49,29 @@ export default function AdminDashboardPage() {
     if (!user) {
       router.push('/login');
     } else if (user.role !== 'admin') {
-      // Redirect non-admin users
       router.push('/');
     } else {
-      fetchCourses();
+      fetchAdminData();
     }
   }, [user, router]);
 
-  const fetchCourses = async () => {
+  const fetchAdminData = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/courses');
-      const data = await res.json();
-      setCourses(data);
+      const [coursesRes, usersRes] = await Promise.all([
+        fetch('/api/courses'),
+        fetch('/api/users'),
+      ]);
+      const coursesData = await coursesRes.json();
+      const usersData = await usersRes.json();
+      setCourses(coursesData);
+      setUsers(usersData);
     } catch (error) {
-      console.error('Failed to fetch courses', error);
+      console.error('Failed to fetch admin data', error);
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Failed to fetch course data.',
+        description: 'Failed to fetch admin data.',
       });
     } finally {
       setLoading(false);
@@ -82,8 +91,6 @@ export default function AdminDashboardPage() {
 
   const handleUpdateCourse = () => {
     if (!selectedCourse) return;
-
-    // Simulate API call and update local state
     const updatedCourses = courses.map(c =>
       c.id === selectedCourse.id ? { ...c, ...updatedCourseData } : c
     );
@@ -98,7 +105,6 @@ export default function AdminDashboardPage() {
   };
   
   const handleDeleteCourse = (courseId: string) => {
-    // Optimistically update UI
     setCourses(courses.filter(c => c.id !== courseId));
     toast({
       title: 'Course Removed',
@@ -110,9 +116,11 @@ export default function AdminDashboardPage() {
     return <div className="flex items-center justify-center min-h-screen">Loading...</div>;
   }
 
+  const conflictCourses = courses.slice(0, 3);
+
   return (
     <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-10 flex items-center justify-between h-16 px-4 border-b bg-background/80 backdrop-blur-sm md:px-6">
+      <header className="sticky top-0 z-30 flex items-center justify-between h-16 px-4 border-b bg-background/80 backdrop-blur-sm md:px-6">
         <div className="flex items-center gap-4">
           <Shield className="h-6 w-6 text-primary" />
           <h1 className="text-2xl font-bold tracking-tight font-headline">Admin Dashboard</h1>
@@ -126,52 +134,173 @@ export default function AdminDashboardPage() {
       </header>
 
       <main className="p-4 md:p-6">
-        <h2 className="text-xl font-semibold font-headline mb-4">Course Management</h2>
-        <div className="border rounded-lg">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Code</TableHead>
-                <TableHead>Title</TableHead>
-                <TableHead>Department</TableHead>
-                <TableHead>Credits</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {loading ? (
-                Array.from({ length: 5 }).map((_, i) => (
-                  <TableRow key={i}>
-                    <TableCell><Skeleton className="h-5 w-20" /></TableCell>
-                    <TableCell><Skeleton className="h-5 w-48" /></TableCell>
-                    <TableCell><Skeleton className="h-5 w-32" /></TableCell>
-                    <TableCell><Skeleton className="h-5 w-16" /></TableCell>
-                    <TableCell className="text-right"><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                courses.map((course) => (
-                  <TableRow key={course.id}>
-                    <TableCell className="font-code font-semibold">{course.code}</TableCell>
-                    <TableCell>{course.title}</TableCell>
-                    <TableCell>{course.department}</TableCell>
-                    <TableCell>{course.credits}</TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="outline" size="sm" className="mr-2" onClick={() => handleEditClick(course)}>
-                        <Edit className="h-4 w-4 mr-2" />
-                        Edit
-                      </Button>
-                      <Button variant="destructive" size="sm" onClick={() => handleDeleteCourse(course.id)}>
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        Delete
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        </div>
+        <Tabs defaultValue="courses">
+          <TabsList className="mb-4">
+            <TabsTrigger value="courses"><BookCopy className="mr-2 h-4 w-4" />Course Management</TabsTrigger>
+            <TabsTrigger value="users"><Users className="mr-2 h-4 w-4" />User Management</TabsTrigger>
+            <TabsTrigger value="conflicts"><AlertTriangle className="mr-2 h-4 w-4" />Conflict Monitoring</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="courses">
+            <Card>
+              <CardHeader>
+                <CardTitle>All Courses</CardTitle>
+                <CardDescription>View, edit, or remove courses from the catalog.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Code</TableHead>
+                      <TableHead>Title</TableHead>
+                      <TableHead>Department</TableHead>
+                      <TableHead>Credits</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {loading ? (
+                      Array.from({ length: 5 }).map((_, i) => (
+                        <TableRow key={i}>
+                          <TableCell><Skeleton className="h-5 w-20" /></TableCell>
+                          <TableCell><Skeleton className="h-5 w-48" /></TableCell>
+                          <TableCell><Skeleton className="h-5 w-32" /></TableCell>
+                          <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                          <TableCell className="text-right"><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      courses.map((course) => (
+                        <TableRow key={course.id}>
+                          <TableCell className="font-code font-semibold">{course.code}</TableCell>
+                          <TableCell>{course.title}</TableCell>
+                          <TableCell>{course.department}</TableCell>
+                          <TableCell>{course.credits}</TableCell>
+                          <TableCell className="text-right">
+                            <Button variant="outline" size="sm" className="mr-2" onClick={() => handleEditClick(course)}>
+                              <Edit className="h-4 w-4 mr-2" />
+                              Edit
+                            </Button>
+                            <Button variant="destructive" size="sm" onClick={() => handleDeleteCourse(course.id)}>
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="users">
+            <Card>
+              <CardHeader>
+                <CardTitle>User Accounts</CardTitle>
+                <CardDescription>Manage all registered user accounts.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>Role</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                     {loading ? (
+                      Array.from({ length: 5 }).map((_, i) => (
+                        <TableRow key={i}>
+                          <TableCell><div className="flex items-center gap-4"><Skeleton className="h-10 w-10 rounded-full" /><Skeleton className="h-5 w-32" /></div></TableCell>
+                          <TableCell><Skeleton className="h-5 w-48" /></TableCell>
+                          <TableCell><Skeleton className="h-6 w-20 rounded-full" /></TableCell>
+                          <TableCell className="text-right"><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      users.map((u) => (
+                        <TableRow key={u.id}>
+                          <TableCell>
+                            <div className="flex items-center gap-4">
+                              <Avatar>
+                                <AvatarImage src={u.profile.avatar} alt={u.profile.name} />
+                                <AvatarFallback>{u.profile.name.charAt(0)}</AvatarFallback>
+                              </Avatar>
+                              <span className="font-medium">{u.profile.name}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>{u.email}</TableCell>
+                          <TableCell>
+                            <Badge variant={u.role === 'admin' ? 'destructive' : 'secondary'}>
+                              {u.role}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">
+                             <Button variant="outline" size="sm">
+                               <UserCog className="h-4 w-4 mr-2" />
+                               Manage
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    )}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="conflicts">
+            <Card>
+              <CardHeader>
+                <CardTitle>Scheduling Conflict Monitoring</CardTitle>
+                <CardDescription>A read-only view of potential scheduling conflicts. This is a simplified mock-up.</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="p-4 border rounded-lg bg-amber-50 border-amber-200">
+                  <div className="flex items-start">
+                    <AlertTriangle className="h-6 w-6 text-amber-600 mr-3" />
+                    <div>
+                      <h4 className="font-bold text-amber-800">Faculty Double-Booking Alert</h4>
+                      <p className="text-sm text-amber-700">Dr. Isaac Newton is scheduled for both <span className="font-semibold">Calculus I (MATH 150)</span> and <span className="font-semibold">Classical Mechanics (PHY 100)</span> on Mondays at 10:00 AM.</p>
+                    </div>
+                  </div>
+                </div>
+                 <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">High-Conflict Courses</CardTitle>
+                    <CardDescription>These courses are frequently involved in student scheduling conflicts.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Course</TableHead>
+                            <TableHead>Department</TableHead>
+                            <TableHead className="text-right">Conflict Rate</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {conflictCourses.map((course, index) => (
+                             <TableRow key={course.id}>
+                               <TableCell className="font-semibold font-code">{course.code}: <span className="font-sans font-normal">{course.title}</span></TableCell>
+                               <TableCell>{course.department}</TableCell>
+                               <TableCell className="text-right font-medium text-destructive">{[25, 18, 12][index]}%</TableCell>
+                             </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                  </CardContent>
+                 </Card>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+        </Tabs>
       </main>
 
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
