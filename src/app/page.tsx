@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -11,15 +11,35 @@ import { Progress } from '@/components/ui/progress';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { BookOpen, Calendar, Users, Award, BookCopy, BarChart, Settings, FolderClock, LogOut } from 'lucide-react';
 import { useAuth } from '@/context/auth-context';
-import { mockPastTimetables } from '@/lib/data'; // Using this to get some completed courses
+import type { PastCourse } from '@/lib/types';
+
 
 export default function DashboardPage() {
     const { user, logout } = useAuth();
     const router = useRouter();
+    const [completedCourses, setCompletedCourses] = useState<PastCourse[]>([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (!user) {
             router.push('/login');
+        } else {
+            const fetchCompletedCourses = async () => {
+                try {
+                    // In a real app, you'd fetch courses for the specific user.
+                    // Here, we just get the first past timetable for demo purposes.
+                    const res = await fetch('/api/timetables');
+                    const data = await res.json();
+                    if (data && data.length > 0) {
+                        setCompletedCourses(data[0].courses.slice(0, 4));
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch completed courses', error);
+                } finally {
+                    setLoading(false);
+                }
+            };
+            fetchCompletedCourses();
         }
     }, [user, router]);
 
@@ -30,9 +50,6 @@ export default function DashboardPage() {
     const { name, avatar, semester, major, year, creditsCompleted, creditsRequired } = user.profile;
 
     const creditProgress = (creditsCompleted / creditsRequired) * 100;
-    
-    // For demonstration, taking some courses from past timetables.
-    const completedCourses = mockPastTimetables[0]?.courses.slice(0, 4) || [];
 
     const handleLogout = () => {
       logout();
@@ -122,6 +139,16 @@ export default function DashboardPage() {
                     </CardTitle>
                 </CardHeader>
                 <CardContent>
+                    {loading ? (
+                        <div className="space-y-4">
+                            <div className="flex justify-between items-center p-3 rounded-lg bg-muted/50">
+                               <div className='w-full space-y-2'>
+                                    <div className="font-semibold w-full h-5"></div>
+                                    <div className="text-sm text-muted-foreground w-full h-4"></div>
+                                </div>
+                            </div>
+                        </div>
+                    ) : (
                     <div className="space-y-4">
                         {completedCourses.map(course => (
                             <div key={course.code} className="flex justify-between items-center p-3 rounded-lg bg-muted/50">
@@ -136,6 +163,7 @@ export default function DashboardPage() {
                             </div>
                         ))}
                     </div>
+                    )}
                 </CardContent>
             </Card>
         </div>

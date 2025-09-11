@@ -1,16 +1,38 @@
+
 'use client';
 
 import Link from 'next/link';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Calendar, FolderClock } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { mockPastTimetables } from '@/lib/data';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
+import type { PastTimetable } from '@/lib/types';
 
 const hasCurrentTimetable = false; // Mock flag
 
 export default function MyTimetablesPage() {
+  const [pastTimetables, setPastTimetables] = useState<PastTimetable[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTimetables = async () => {
+      try {
+        const res = await fetch('/api/timetables');
+        const data = await res.json();
+        setPastTimetables(data);
+      } catch (error) {
+        console.error('Failed to fetch past timetables', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTimetables();
+  }, []);
+
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="sticky top-0 z-10 flex items-center h-16 px-4 border-b bg-background/80 backdrop-blur-sm md:px-6">
@@ -58,9 +80,14 @@ export default function MyTimetablesPage() {
               <CardDescription>Review your schedules from previous semesters.</CardDescription>
             </CardHeader>
             <CardContent>
-              {mockPastTimetables.length > 0 ? (
+              {loading ? (
+                <div className="space-y-4">
+                  <Skeleton className="h-12 w-full" />
+                  <Skeleton className="h-12 w-full" />
+                </div>
+              ) : pastTimetables.length > 0 ? (
                 <Accordion type="single" collapsible className="w-full">
-                  {mockPastTimetables.map((timetable) => (
+                  {pastTimetables.map((timetable) => (
                     <AccordionItem key={timetable.semester} value={timetable.semester}>
                       <AccordionTrigger className="font-semibold text-lg">
                         {timetable.semester}

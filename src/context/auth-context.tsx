@@ -2,11 +2,11 @@
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
-import { users, User } from '@/lib/users';
+import type { User } from '@/lib/users';
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, pass: string) => User;
+  login: (email: string, pass: string) => Promise<User>;
   logout: () => void;
 }
 
@@ -22,15 +22,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   }, []);
 
-  const login = (email: string, pass: string): User => {
-    const foundUser = users.find(u => u.email === email && u.password === pass);
-    if (foundUser) {
-      setUser(foundUser);
-      localStorage.setItem('course-craft-user', JSON.stringify(foundUser));
-      return foundUser;
-    } else {
-      throw new Error('Invalid email or password');
+  const login = async (email: string, pass: string): Promise<User> => {
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password: pass }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || 'Invalid email or password');
     }
+    
+    const foundUser = data.user;
+    setUser(foundUser);
+    localStorage.setItem('course-craft-user', JSON.stringify(foundUser));
+    return foundUser;
   };
 
   const logout = () => {

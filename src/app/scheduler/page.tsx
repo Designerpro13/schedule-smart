@@ -1,10 +1,10 @@
+
 'use client';
 
 import type { FC } from 'react';
 import Link from 'next/link';
 import { useState, useMemo, useEffect, useCallback } from 'react';
 import type { Course, TimetableCourse, Day, Department } from '@/lib/types';
-import { mockCourses } from '@/lib/data';
 import { CourseList } from '@/components/course-list';
 import { Timetable } from '@/components/timetable';
 import { Button } from '@/components/ui/button';
@@ -41,11 +41,29 @@ const TIME_SLOTS = Array.from({ length: 11 }, (_, i) => `${(i + 8).toString().pa
 
 const SchedulerPage: FC = () => {
   const [timetable, setTimetable] = useState<TimetableCourse[]>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
   const [departmentFilter, setDepartmentFilter] = useState<Department | 'all'>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const { toast } = useToast();
   const [email, setEmail] = useState('');
   const [currentTime, setCurrentTime] = useState('');
+  const [loadingCourses, setLoadingCourses] = useState(true);
+
+  useEffect(() => {
+    const fetchCourses = async () => {
+      setLoadingCourses(true);
+      try {
+        const res = await fetch('/api/courses');
+        const data = await res.json();
+        setCourses(data);
+      } catch (error) {
+        console.error('Failed to fetch courses', error);
+      } finally {
+        setLoadingCourses(false);
+      }
+    };
+    fetchCourses();
+  }, []);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -151,14 +169,14 @@ const SchedulerPage: FC = () => {
   };
 
   const filteredCourses = useMemo(() => {
-    return mockCourses.filter(course => {
+    return courses.filter(course => {
       const matchesDepartment = departmentFilter === 'all' || course.department === departmentFilter;
       const matchesSearch =
         course.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         course.code.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesDepartment && matchesSearch;
     });
-  }, [departmentFilter, searchQuery]);
+  }, [departmentFilter, searchQuery, courses]);
   
   return (
     <div className="min-h-screen w-full">
@@ -264,6 +282,7 @@ const SchedulerPage: FC = () => {
           </div>
           <CourseList
             courses={filteredCourses}
+            loading={loadingCourses}
             onAddCourse={addCourse}
             department={departmentFilter}
             onDepartmentChange={setDepartmentFilter}

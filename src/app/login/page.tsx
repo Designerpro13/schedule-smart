@@ -15,15 +15,17 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setLoading(true);
     try {
-      const user = login(email, password);
+      const user = await login(email, password);
       toast({
         title: 'Login Successful',
         description: `Welcome back, ${user.name}!`,
@@ -36,12 +38,15 @@ export default function LoginPage() {
         title: 'Login Failed',
         description: err.message,
       });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleBypass = () => {
+  const handleBypass = async () => {
+    setLoading(true);
     try {
-      const user = login('alex.doe@university.edu', 'password123');
+      const user = await login('alex.doe@university.edu', 'password123');
       toast({
         title: 'Bypass Successful',
         description: `Logged in as ${user.name} for debugging.`,
@@ -54,6 +59,8 @@ export default function LoginPage() {
         title: 'Bypass Login Failed',
         description: err.message,
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -81,6 +88,7 @@ export default function LoginPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 className="bg-background/80"
+                disabled={loading}
               />
             </div>
             <div className="space-y-2">
@@ -93,6 +101,7 @@ export default function LoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                  className="bg-background/80"
+                 disabled={loading}
               />
             </div>
             {error && (
@@ -103,10 +112,10 @@ export default function LoginPage() {
             )}
           </CardContent>
           <CardFooter className="flex-col gap-2">
-            <Button type="submit" className="w-full">
-              Sign In
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? 'Signing In...' : 'Sign In'}
             </Button>
-            <Button type="button" variant="secondary" className="w-full" onClick={handleBypass}>
+            <Button type="button" variant="secondary" className="w-full" onClick={handleBypass} disabled={loading}>
               Bypass Login (Debug)
             </Button>
           </CardFooter>
