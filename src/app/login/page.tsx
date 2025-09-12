@@ -17,24 +17,33 @@ export default function LoginSelectionPage() {
           <CardDescription>Please select your role to sign in.</CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
-          <Link href="/login/student" passHref>
-            <Button className="w-full" size="lg">
-              <User className="mr-2" />
-              I am a Student
-            </Button>
-          </Link>
-          <Link href="/login/admin" passHref>
-            <Button variant="secondary" className="w-full" size="lg">
-              <Shield className="mr-2" />
-              I am an Admin
-            </Button>
-          </Link>
-          <Link href="/login/techy" passHref>
-            <Button variant="outline" className="w-full" size="lg">
-              <Wrench className="mr-2" />
-              I am Tech Support
-            </Button>
-          </Link>
+          <div className="relative group">
+             <div className="absolute -inset-0.5 bg-gradient-to-r from-primary to-secondary rounded-lg blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-tilt"></div>
+              <Link href="/login/student" passHref>
+                <Button className="w-full relative" size="lg">
+                  <User className="mr-2" />
+                  I am a Student
+                </Button>
+              </Link>
+          </div>
+          <div className="relative group">
+             <div className="absolute -inset-0.5 bg-gradient-to-r from-secondary to-primary rounded-lg blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-tilt"></div>
+              <Link href="/login/admin" passHref>
+                <Button variant="secondary" className="w-full relative" size="lg">
+                  <Shield className="mr-2" />
+                  I am an Admin
+                </Button>
+              </Link>
+          </div>
+           <div className="relative group">
+             <div className="absolute -inset-0.5 bg-gradient-to-r from-gray-400 to-gray-600 rounded-lg blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-tilt"></div>
+              <Link href="/login/techy" passHref>
+                <Button variant="outline" className="w-full relative" size="lg">
+                  <Wrench className="mr-2" />
+                  I am Tech Support
+                </Button>
+              </Link>
+          </div>
         </CardContent>
       </Card>
     </div>
