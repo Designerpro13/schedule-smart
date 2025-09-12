@@ -11,7 +11,7 @@ export default function LoginSelectionPage() {
     <div className="relative flex items-center justify-center min-h-screen bg-background">
       <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-secondary/20 -z-10"></div>
       
-      <Card className="w-full max-w-sm bg-white/30 backdrop-blur-lg border-white/40 shadow-2xl">
+      <Card className="w-full max-w-sm bg-card shadow-2xl border-border/50">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-headline text-foreground">Welcome to CourseCraft</CardTitle>
           <CardDescription>Please select your role to sign in.</CardDescription>
@@ -32,7 +32,7 @@ export default function LoginSelectionPage() {
           <Link href="/login/techy" passHref>
             <Button variant="outline" className="w-full" size="lg">
               <Wrench className="mr-2" />
-              I am a Tech Support
+              I am Tech Support
             </Button>
           </Link>
         </CardContent>
