@@ -29,7 +29,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { BookOpen, CalendarDays, Mail, AlertTriangle, Info, Clock, Menu, ArrowLeft } from 'lucide-react';
+import { BookOpen, CalendarDays, Mail, AlertTriangle, Info, Clock, Menu, ArrowLeft, Save } from 'lucide-react';
 import { useSessionTimeout } from '@/hooks/use-session-timeout';
 import { SessionTimeoutModal } from '@/components/session-timeout-modal';
 
@@ -167,6 +167,15 @@ const SchedulerPage: FC = () => {
     console.log(`Sending timetable to ${email}`);
     toast({ title: "Timetable Sent!", description: `Your schedule has been sent to ${email}.` });
   };
+  
+  const handleSaveTimetable = () => {
+    // In a real app, this would send the `timetable` state to a backend API.
+    // For this prototype, we'll just show a success message.
+    toast({
+      title: 'Timetable Saved!',
+      description: 'Your current schedule has been successfully saved.',
+    });
+  };
 
   const filteredCourses = useMemo(() => {
     return courses.filter(course => {
@@ -225,33 +234,39 @@ const SchedulerPage: FC = () => {
           </div>
         </div>
 
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button disabled={creditStatus !== 'ok'}>
-              <Mail className="mr-2 h-4 w-4" />
-              Send to Email
+        <div className="flex items-center gap-2">
+          <Button onClick={handleSaveTimetable} disabled={timetable.length === 0}>
+              <Save className="mr-2 h-4 w-4" />
+              Save Timetable
             </Button>
-          </DialogTrigger>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle className="font-headline">Send Timetable</DialogTitle>
-              <DialogDescription>
-                Enter your email address to receive a copy of your timetable.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="grid gap-4 py-4">
-              <div className="grid grid-cols-4 items-center gap-4">
-                <Label htmlFor="email" className="text-right">
-                  Email
-                </Label>
-                <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com" className="col-span-3" />
+          <Dialog>
+            <DialogTrigger asChild>
+              <Button disabled={creditStatus !== 'ok'}>
+                <Mail className="mr-2 h-4 w-4" />
+                Send to Email
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+              <DialogHeader>
+                <DialogTitle className="font-headline">Send Timetable</DialogTitle>
+                <DialogDescription>
+                  Enter your email address to receive a copy of your timetable.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="email" className="text-right">
+                    Email
+                  </Label>
+                  <Input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com" className="col-span-3" />
+                </div>
               </div>
-            </div>
-            <DialogFooter>
-              <Button type="submit" onClick={handleSendEmail}>Send</Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
+              <DialogFooter>
+                <Button type="submit" onClick={handleSendEmail}>Send</Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
       </header>
 
       <main className="grid flex-1 grid-cols-1 md:grid-cols-[350px_1fr] lg:grid-cols-[400px_1fr]">
@@ -307,3 +322,5 @@ const SchedulerPage: FC = () => {
 };
 
 export default SchedulerPage;
+
+    
