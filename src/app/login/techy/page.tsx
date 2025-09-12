@@ -67,65 +67,68 @@ export default function TechyLoginPage() {
       </Link>
       <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-secondary/20 -z-10"></div>
       
-      <Card className="w-full max-w-sm bg-white/30 backdrop-blur-lg border-white/40 shadow-2xl">
-        <CardHeader className="text-center">
-          <div className="flex justify-center mb-4">
-            <Wrench className="w-12 h-12 text-primary" />
-          </div>
-          <CardTitle className="text-3xl font-headline text-foreground">Tech Support Login</CardTitle>
-          <CardDescription>Sign in to the support panel</CardDescription>
-        </CardHeader>
-        <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
-            <div className="space-y-2">
-               <div className="flex justify-between items-center">
-                <Label htmlFor="email">Email</Label>
-                <Button variant="ghost" size="icon" type="button" onClick={handleAutofill} className="h-6 w-6 text-muted-foreground" title="Auto-fill for demo">
-                    <PenSquare className="h-4 w-4" />
-                </Button>
-              </div>
-              <Input
-                id="email"
-                type="email"
-                placeholder="tech@university.edu"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="bg-background/80"
-                disabled={loading}
-              />
+      <div className="relative group">
+        <div className="absolute -inset-1 bg-gradient-to-r from-primary to-secondary rounded-lg blur opacity-25 group-hover:opacity-100 transition duration-1000 group-hover:duration-200 animate-tilt"></div>
+        <Card className="relative w-full max-w-sm bg-card shadow-2xl border-border/50">
+          <CardHeader className="text-center">
+            <div className="flex justify-center mb-4">
+              <Wrench className="w-12 h-12 text-primary" />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                 className="bg-background/80"
-                 disabled={loading}
-              />
-            </div>
-            {error && (
-              <div className="flex items-center p-2 text-sm rounded-md bg-destructive/10 text-destructive">
-                <AlertTriangle className="w-4 h-4 mr-2" />
-                <span>{error}</span>
+            <CardTitle className="text-3xl font-headline text-foreground">Tech Support Login</CardTitle>
+            <CardDescription>Sign in to the support panel</CardDescription>
+          </CardHeader>
+          <form onSubmit={handleSubmit}>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                 <div className="flex justify-between items-center">
+                  <Label htmlFor="email">Email</Label>
+                  <Button variant="ghost" size="icon" type="button" onClick={handleAutofill} className="h-6 w-6 text-muted-foreground" title="Auto-fill for demo">
+                      <PenSquare className="h-4 w-4" />
+                  </Button>
+                </div>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="tech@university.edu"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="bg-background/80"
+                  disabled={loading}
+                />
               </div>
-            )}
-          </CardContent>
-          <CardFooter className="flex-col gap-2">
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Signing In...' : 'Sign In'}
-            </Button>
-             <Separator className="my-2" />
-             <p className="text-xs text-muted-foreground">
-                <Link href="/login" className="underline hover:text-primary">Back to role selection</Link>
-            </p>
-          </CardFooter>
-        </form>
-      </Card>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                   className="bg-background/80"
+                   disabled={loading}
+                />
+              </div>
+              {error && (
+                <div className="flex items-center p-2 text-sm rounded-md bg-destructive/10 text-destructive">
+                  <AlertTriangle className="w-4 h-4 mr-2" />
+                  <span>{error}</span>
+                </div>
+              )}
+            </CardContent>
+            <CardFooter className="flex-col gap-2">
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? 'Signing In...' : 'Sign In'}
+              </Button>
+               <Separator className="my-2" />
+               <p className="text-xs text-muted-foreground">
+                  <Link href="/login" className="underline hover:text-primary">Back to role selection</Link>
+              </p>
+            </CardFooter>
+          </form>
+        </Card>
+      </div>
     </div>
   );
 }
