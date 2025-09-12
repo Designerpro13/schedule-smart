@@ -32,6 +32,7 @@ import { useToast } from '@/hooks/use-toast';
 import { BookOpen, CalendarDays, Mail, AlertTriangle, Info, Clock, Menu, ArrowLeft, Save } from 'lucide-react';
 import { useSessionTimeout } from '@/hooks/use-session-timeout';
 import { SessionTimeoutModal } from '@/components/session-timeout-modal';
+import { useAuth } from '@/context/auth-context';
 
 const MIN_CREDITS = 17;
 const MAX_CREDITS = 27;
@@ -39,7 +40,18 @@ const MAX_CREDITS = 27;
 const DAYS: Day[] = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
 const TIME_SLOTS = Array.from({ length: 11 }, (_, i) => `${(i + 8).toString().padStart(2, '0')}:00`); // 08:00 to 18:00
 
+// A helper function to post logs without awaiting
+const postLog = (message: string, level: 'INFO' | 'WARN' | 'DEBUG', userEmail: string) => {
+  fetch('/api/logs', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message, level, user: userEmail }),
+  }).catch(console.error);
+};
+
+
 const SchedulerPage: FC = () => {
+  const { user } = useAuth();
   const [timetable, setTimetable] = useState<TimetableCourse[]>([]);
   const [courses, setCourses] = useState<Course[]>([]);
   const [departmentFilter, setDepartmentFilter] = useState<Department | 'all'>('all');
@@ -101,13 +113,21 @@ const SchedulerPage: FC = () => {
   }, []);
 
   const updateConflicts = useCallback((currentTimetable: TimetableCourse[]) => {
-    return currentTimetable.map(course => ({
+    const updatedWithConflicts = currentTimetable.map(course => ({
       ...course,
       hasConflict: checkConflict(course, currentTimetable),
     }));
-  }, [checkConflict]);
+
+    const conflictCount = updatedWithConflicts.filter(c => c.hasConflict).length;
+    if (conflictCount > 0 && user) {
+        postLog(`Timetable conflict detected for user. ${conflictCount} conflicts present.`, 'WARN', user.email);
+    }
+    return updatedWithConflicts;
+  }, [checkConflict, user]);
 
   const addCourse = (course: Course) => {
+    if (!user) return;
+
     if (timetable.some(c => c.id === course.id)) {
       toast({
         variant: 'destructive',
@@ -128,6 +148,7 @@ const SchedulerPage: FC = () => {
             title: 'Course Added',
             description: `${course.code} has been added to your timetable.`,
           });
+          postLog(`Added course '${course.code}' to timetable.`, 'INFO', user.email);
           return;
         }
       }
@@ -138,25 +159,35 @@ const SchedulerPage: FC = () => {
       title: 'No Available Slot',
       description: `Could not find a free slot for ${course.code}. Please make space.`,
     });
+     postLog(`Failed to add course '${course.code}': No available slot.`, 'WARN', user.email);
   };
 
   const removeCourse = (courseId: string) => {
+    if (!user) return;
+
+    const removedCourse = timetable.find(c => c.id === courseId);
     const newTimetable = timetable.filter(c => c.id !== courseId);
     setTimetable(updateConflicts(newTimetable));
-    const removedCourse = timetable.find(c => c.id === courseId);
+
     if(removedCourse){
       toast({
         title: 'Course Removed',
         description: `${removedCourse.code} has been removed from your timetable.`,
       });
+      postLog(`Removed course '${removedCourse.code}' from timetable.`, 'INFO', user.email);
     }
   };
 
   const moveCourse = (courseId: string, newDay: Day, newTime: string) => {
+    if (!user) return;
+    const movedCourse = timetable.find(c => c.id === courseId);
+    if (!movedCourse) return;
+
     const newTimetable = timetable.map(c =>
       c.id === courseId ? { ...c, day: newDay, time: newTime } : c
     );
     setTimetable(updateConflicts(newTimetable));
+    postLog(`Moved course '${movedCourse.code}' to ${newDay} at ${newTime}.`, 'DEBUG', user.email);
   };
   
   const handleSendEmail = () => {
@@ -169,12 +200,14 @@ const SchedulerPage: FC = () => {
   };
   
   const handleSaveTimetable = () => {
+    if (!user) return;
     // In a real app, this would send the `timetable` state to a backend API.
     // For this prototype, we'll just show a success message.
     toast({
       title: 'Timetable Saved!',
       description: 'Your current schedule has been successfully saved.',
     });
+    postLog(`User saved timetable with ${timetable.length} courses and ${totalCredits} credits.`, 'INFO', user.email);
   };
 
   const filteredCourses = useMemo(() => {
